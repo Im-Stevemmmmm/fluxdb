@@ -1,8 +1,6 @@
 package main
 
 import (
-	"github.com/Im-Stevemmmmm/bptree"
-
 	"github.com/Im-Stevemmmmm/fluxdb/database"
 )
 
@@ -11,14 +9,12 @@ const (
 )
 
 func main() {
-	db := &database.DB{
-		ReplicationNodes: make([]*database.ReplicationNode, 0),
-		KVPairs:          bptree.NewTree(),
-	}
-
-	if node := db.VerifyReplicationNodes(); node != nil {
+	nodes := make([]*database.ReplicationNode, 0)
+	if node := database.VerifyReplicationNodes(nodes); node != nil {
 		panic("invalid replication node: " + *node)
 	}
+
+	database.LightDB = database.NewDB(nil)
 
 	initAPI()
 	displayStartupMessage()

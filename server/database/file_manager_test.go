@@ -8,27 +8,25 @@ import (
 )
 
 func TestRelativePath(t *testing.T) {
-	rp, err := NewRelativePath("some/path")
-	if err != nil {
-		t.Fatal(err)
+	// Prevent filesystem modification.
+	called := false
+	osMkdir = func(path string, perm os.FileMode) error {
+		called = true
+		return nil
 	}
+
+	rp := NewRelativePath("some/path")
 
 	absDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		t.Fatal("error parsing path")
 	}
 
-	path := string(rp)
+	path := string(*rp)
 	expectedPath := fmt.Sprintf("%s/%s", absDir, "some/path")
 
 	if path != expectedPath {
 		t.Fatalf("got %s; expected %s", path, expectedPath)
-	}
-
-	called := false
-	osMkdir = func(path string, perm os.FileMode) error {
-		called = true
-		return nil
 	}
 
 	err = rp.Mkdir()

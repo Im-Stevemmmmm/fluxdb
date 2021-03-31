@@ -3,10 +3,9 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
-	"github.com/gorilla/mux"
-
-	"github.com/Im-Stevemmmmm/fluxdb/database/document"
+	"github.com/Im-Stevemmmmm/fluxdb/database"
 )
 
 var (
@@ -15,13 +14,15 @@ var (
 		POST,
 	}
 	insertEndpoint = endpoint{
-		Path:        "/{namespace}/{index}/_field",
+		Path:        "/_insert",
 		HandlerFunc: insertHandler,
 		Methods:     insertMethods,
 	}
 )
 
 func insertHandler(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
 	if errObj := validateRequest(r, insertMethods); errObj != nil {
 		json.NewEncoder(w).Encode(errObj)
 		return
@@ -41,28 +42,32 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vars := mux.Vars(r)
-	ns := vars["namespace"]
-	index := vars["index"]
+	err = database.LightDB.Set(*body.Key, *body.Value)
+	if err != nil {
+		NewRequestError(RuntimeError, "Unable to set value")
+	}
 
-	res, err := document.Insert(&document.InsertCommandInput{
-		Namespace: ns,
-		Index:     index,
-		Payload:   body.Document,
+	duration := time.Since(startTime)
+
+	json.NewEncoder(w).Encode(insertResult{
+		InsertCount: 1,
+		InsertTime:  duration.Milliseconds(),
 	})
-	json.NewEncoder(w).Encode(res)
 }
 
 func (i insertRequest) isValid() *RequestError {
-	if i.Document == nil {
-		return NewRequestError(MalformedRequest, "Missing insertion data")
+	if i.Key == nil {
+		return NewRequestError(MalformedRequest, "Missing key")
+	}
+	if i.Value == nil {
+		return NewRequestError(MalformedRequest, "Missing value")
 	}
 	return nil
 }
 
 type insertRequest struct {
-	Document         document.Document `json:"document"`
-	ReturnAttributes []string          `json:"return_attributes"`
+	Key   *string      `json:"key"`
+	Value *interface{} `json:"value"`
 }
 
 type insertResult struct {

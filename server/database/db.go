@@ -6,6 +6,10 @@ import (
 	"github.com/Im-Stevemmmmm/bptree"
 )
 
+// LightDB is the database instance at runtime.
+var LightDB *DB
+
+// NewDB initializes a new DB from a slice of ReplicationNode.
 func NewDB(replicationNodes []*ReplicationNode) *DB {
 	return &DB{
 		replicationNodes: replicationNodes,
