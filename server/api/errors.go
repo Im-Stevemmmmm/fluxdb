@@ -1,6 +1,8 @@
 package api
 
 import (
+	"encoding/json"
+	"net/http"
 	"time"
 )
 
@@ -11,6 +13,10 @@ const (
 	ImproperHttpMethod           = "IMPROPER_HTTP_METHOD"
 	RuntimeError                 = "RUNTIME_ERROR"
 )
+
+func (r RequestError) Write(w http.ResponseWriter) {
+	json.NewEncoder(w).Encode(r)
+}
 
 // NewRequestError creates a new APIRequestError and initializes the time
 // to the current time.

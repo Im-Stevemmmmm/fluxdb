@@ -10,6 +10,7 @@ var (
 	// Endpoints is the available endpoints for performing actions on the database
 	Endpoints = []endpoint{
 		insertEndpoint,
+		readEndpoint,
 	}
 )
 

@@ -7,7 +7,6 @@ import (
 func (db *DB) LoadPersistenceData() {
 	db.ioRWMutex.RLock()
 	defer db.ioRWMutex.RUnlock()
-
 }
 
 // Get retrieves the value of a key. Returns an error if the key is undefined.
@@ -40,7 +39,7 @@ func (db *DB) Set(key string, value interface{}) error {
 		return err
 	}
 
-	// Persist data
+	// Persist data by writing it to the persistence file.
 	go func() {
 		db.ioRWMutex.Lock()
 		defer db.ioRWMutex.Unlock()

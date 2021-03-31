@@ -23,8 +23,8 @@ var (
 func insertHandler(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 
-	if errObj := validateRequest(r, insertMethods); errObj != nil {
-		json.NewEncoder(w).Encode(errObj)
+	if err := validateRequest(r, insertMethods); err != nil {
+		err.Write(w)
 		return
 	}
 
@@ -32,13 +32,12 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		err := NewRequestError(RuntimeError, "Invalid body")
-		json.NewEncoder(w).Encode(err)
+		NewRequestError(RuntimeError, "Invalid body").Write(w)
 		return
 	}
 
-	if err := body.isValid(); err != nil {
-		json.NewEncoder(w).Encode(err)
+	if err := body.IsValid(); err != nil {
+		err.Write(w)
 		return
 	}
 
@@ -55,7 +54,7 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (i insertRequest) isValid() *RequestError {
+func (i insertRequest) IsValid() *RequestError {
 	if i.Key == nil {
 		return NewRequestError(MalformedRequest, "Missing key")
 	}
