@@ -10,7 +10,7 @@ func NewDB(replicationNodes []*ReplicationNode) *DB {
 	return &DB{
 		replicationNodes: replicationNodes,
 		datafile:         NewRelativePath("ldb/data"),
-		kvPairs:          bptree.NewTree(),
+		index:            bptree.NewTree(),
 		ioWg:             &sync.WaitGroup{},
 		ioRWMutex:        &sync.RWMutex{},
 	}
@@ -20,7 +20,7 @@ func NewDB(replicationNodes []*ReplicationNode) *DB {
 type DB struct {
 	replicationNodes []*ReplicationNode
 	datafile         *RelativePath
-	kvPairs          *bptree.Tree
+	index            *bptree.Tree
 	ioWg             *sync.WaitGroup
 	ioRWMutex        *sync.RWMutex
 }

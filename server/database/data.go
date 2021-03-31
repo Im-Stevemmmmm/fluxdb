@@ -14,7 +14,7 @@ func (db *DB) LoadPersistenceData() {
 func (db *DB) Get(key string) (interface{}, error) {
 	h := hashOf(key)
 
-	rec, err := db.kvPairs.Find(h)
+	rec, err := db.index.Find(h)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func (db *DB) Set(key string, value interface{}) error {
 		return err
 	}
 
-	if err := db.kvPairs.Insert(h, data); err != nil {
+	if err := db.index.Insert(h, data); err != nil {
 		return err
 	}
 
@@ -65,7 +65,7 @@ func (db *DB) Set(key string, value interface{}) error {
 func (db *DB) Update(key string, value interface{}) error {
 	h := hashOf(key)
 
-	err := db.kvPairs.Delete(h)
+	err := db.index.Delete(h)
 	if err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func (db *DB) Update(key string, value interface{}) error {
 		return err
 	}
 
-	if err := db.kvPairs.Insert(h, data); err != nil {
+	if err := db.index.Insert(h, data); err != nil {
 		return err
 	}
 
@@ -87,7 +87,7 @@ func (db *DB) Update(key string, value interface{}) error {
 func (db *DB) Delete(key string) error {
 	h := hashOf(key)
 
-	err := db.kvPairs.Delete(h)
+	err := db.index.Delete(h)
 	if err != nil {
 		return err
 	}
