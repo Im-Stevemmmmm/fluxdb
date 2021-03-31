@@ -20,35 +20,25 @@ func NewRelativePath(path string) *RelativePath {
 	return (*RelativePath)(&fp)
 }
 
-// Mkdir creates a directory at the path.
-func (p RelativePath) Mkdir() error {
-	err := osMkdir(string(p), os.ModePerm)
-	if err != nil {
-		return err
-	}
-	return nil
+// Mkdir creates a directory.
+func (p *RelativePath) Mkdir() (err error) {
+	err = osMkdir(string(*p), os.ModePerm)
+	return
+}
+
+// RmDir removes the directory.
+func (p *RelativePath) RmDir() (err error) {
+	err = os.RemoveAll(string(*p))
+	return
 }
 
 // OpenFile attempts to open the file at the specified path and returns an
 // error if the path is a directory and not a file or there is a problem
 // opening the file.
-func (p RelativePath) OpenFile() (*os.File, error) {
-	path := string(p)
+func (p *RelativePath) OpenFile(file string) (*os.File, error) {
+	path := fmt.Sprintf("%s/%s", string(*p), file)
 
-	fstat, err := os.Stat(path)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if fstat.IsDir() {
-		return nil, &OpenFileError{
-			IsFile: false,
-			Err:    errors.New(path + " is not a file"),
-		}
-	}
-
-	f, err := os.Open(path)
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return nil, &OpenFileError{
 			IsFile: true,
@@ -59,7 +49,7 @@ func (p RelativePath) OpenFile() (*os.File, error) {
 	return f, nil
 }
 
-func (e OpenFileError) Error() string {
+func (e *OpenFileError) Error() string {
 	return e.Err.Error()
 }
 
