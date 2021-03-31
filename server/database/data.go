@@ -4,6 +4,12 @@ import (
 	"encoding/json"
 )
 
+func (db *DB) LoadPersistenceData() {
+	db.ioRWMutex.RLock()
+	defer db.ioRWMutex.RUnlock()
+
+}
+
 // Get retrieves the value of a key. Returns an error if the key is undefined.
 func (db *DB) Get(key string) (interface{}, error) {
 	h := hashOf(key)
@@ -33,6 +39,23 @@ func (db *DB) Set(key string, value interface{}) error {
 	if err := db.kvPairs.Insert(h, data); err != nil {
 		return err
 	}
+
+	// Persist data
+	go func() {
+		db.ioRWMutex.Lock()
+		defer db.ioRWMutex.Unlock()
+
+		path := NewRelativePath("/lightdb")
+		if err := path.Mkdir(); err != nil {
+			return
+		}
+
+		_, err = path.OpenFile()
+		if err != nil {
+			return
+		}
+
+	}()
 
 	return nil
 }

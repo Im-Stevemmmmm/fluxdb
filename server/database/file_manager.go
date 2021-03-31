@@ -10,13 +10,14 @@ import (
 var osMkdir = os.MkdirAll
 
 // NewRelativePath constructs a relative path from a path string.
-func NewRelativePath(path string) (RelativePath, error) {
+func NewRelativePath(path string) *RelativePath {
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
-		return "", err
+		fmt.Println(err)
+		return nil
 	}
 	fp := fmt.Sprintf("%s/%s", dir, path)
-	return RelativePath(fp), nil
+	return (*RelativePath)(&fp)
 }
 
 // Mkdir creates a directory at the path.
