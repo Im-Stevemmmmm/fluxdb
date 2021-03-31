@@ -41,7 +41,7 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.LightDB.Set(*body.Key, *body.Value)
+	err = database.Instance.Set(*body.Key, *body.Value)
 	if err != nil {
 		NewRequestError(RuntimeError, "Unable to set value")
 	}

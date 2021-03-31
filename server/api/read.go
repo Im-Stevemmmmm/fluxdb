@@ -37,13 +37,14 @@ func readHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := body.IsValid(); err != nil {
-		json.NewEncoder(w).Encode(err)
+		err.Write(w)
 		return
 	}
 
-	value, err := database.LightDB.Get(*body.Key)
+	value, err := database.Instance.Get(*body.Key)
 	if err != nil {
 		NewRequestError(RuntimeError, "Could not read key").Write(w)
+		return
 	}
 
 	duration := time.Since(startTime)
