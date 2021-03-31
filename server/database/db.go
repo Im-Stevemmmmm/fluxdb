@@ -6,14 +6,14 @@ import (
 	"github.com/Im-Stevemmmmm/bptree"
 )
 
-// LightDB is the database instance at runtime.
-var LightDB *DB
+// Instance is the database instance at runtime.
+var Instance *DB
 
 // NewDB initializes a new DB from a slice of ReplicationNode.
 func NewDB(replicationNodes []*ReplicationNode) *DB {
 	return &DB{
 		replicationNodes: replicationNodes,
-		datafile:         NewRelativePath("ldb/data"),
+		path:             NewRelativePath("ldb"),
 		index:            bptree.NewTree(),
 		ioWg:             &sync.WaitGroup{},
 		ioRWMutex:        &sync.RWMutex{},
@@ -23,7 +23,7 @@ func NewDB(replicationNodes []*ReplicationNode) *DB {
 // DB is the database configuration.
 type DB struct {
 	replicationNodes []*ReplicationNode
-	datafile         *RelativePath
+	path             *RelativePath
 	index            *bptree.Tree
 	ioWg             *sync.WaitGroup
 	ioRWMutex        *sync.RWMutex

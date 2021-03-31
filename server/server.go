@@ -14,7 +14,9 @@ func main() {
 		panic("invalid replication node: " + *node)
 	}
 
-	database.LightDB = database.NewDB(nil)
+	database.Instance = database.NewDB(nodes)
+
+	database.Instance.LoadData()
 
 	initAPI()
 	displayStartupMessage()

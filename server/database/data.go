@@ -4,16 +4,11 @@ import (
 	"encoding/json"
 )
 
-func (db *DB) LoadPersistenceData() {
-	db.ioRWMutex.RLock()
-	defer db.ioRWMutex.RUnlock()
-}
-
 // Get retrieves the value of a key. Returns an error if the key is undefined.
 func (db *DB) Get(key string) (interface{}, error) {
 	h := hashOf(key)
 
-	rec, err := db.index.Find(h)
+	rec, err := db.index.Find(int(h))
 	if err != nil {
 		return nil, err
 	}
@@ -35,26 +30,11 @@ func (db *DB) Set(key string, value interface{}) error {
 		return err
 	}
 
-	if err := db.index.Insert(h, data); err != nil {
+	if err := db.index.Insert(int(h), data); err != nil {
 		return err
 	}
 
-	// Persist data by writing it to the persistence file.
-	go func() {
-		db.ioRWMutex.Lock()
-		defer db.ioRWMutex.Unlock()
-
-		path := NewRelativePath("/lightdb")
-		if err := path.Mkdir(); err != nil {
-			return
-		}
-
-		_, err = path.OpenFile()
-		if err != nil {
-			return
-		}
-
-	}()
+	go db.WriteDisk(h, value)
 
 	return nil
 }
@@ -64,7 +44,7 @@ func (db *DB) Set(key string, value interface{}) error {
 func (db *DB) Update(key string, value interface{}) error {
 	h := hashOf(key)
 
-	err := db.index.Delete(h)
+	err := db.index.Delete(int(h))
 	if err != nil {
 		return err
 	}
@@ -74,7 +54,7 @@ func (db *DB) Update(key string, value interface{}) error {
 		return err
 	}
 
-	if err := db.index.Insert(h, data); err != nil {
+	if err := db.index.Insert(int(h), data); err != nil {
 		return err
 	}
 
@@ -86,7 +66,7 @@ func (db *DB) Update(key string, value interface{}) error {
 func (db *DB) Delete(key string) error {
 	h := hashOf(key)
 
-	err := db.index.Delete(h)
+	err := db.index.Delete(int(h))
 	if err != nil {
 		return err
 	}

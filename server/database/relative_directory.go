@@ -9,15 +9,15 @@ import (
 
 var osMkdir = os.MkdirAll
 
-// NewRelativePath constructs a relative path from a path string.
-func NewRelativePath(path string) *RelativePath {
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		fmt.Println(err)
-		return nil
+func (p *RelativePath) Exists() (bool, error) {
+	_, err := os.Stat(string(*p))
+	if err == nil {
+		return true, nil
 	}
-	fp := fmt.Sprintf("%s/%s", dir, path)
-	return (*RelativePath)(&fp)
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
 }
 
 // Mkdir creates a directory.
@@ -49,6 +49,20 @@ func (p *RelativePath) OpenFile(file string) (*os.File, error) {
 	return f, nil
 }
 
+// NewRelativePath constructs a relative path from a path string.
+func NewRelativePath(path string) *RelativePath {
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	fp := fmt.Sprintf("%s/%s", dir, path)
+	return (*RelativePath)(&fp)
+}
+
+// RelativePath is a path relative to the database process.
+type RelativePath string
+
 func (e *OpenFileError) Error() string {
 	return e.Err.Error()
 }
@@ -58,6 +72,3 @@ type OpenFileError struct {
 	IsFile bool
 	Err    error
 }
-
-// RelativePath is a path relative to the database process.
-type RelativePath string
